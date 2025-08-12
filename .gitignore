@@ -1,0 +1,5 @@
+# Don't upload environment variables
+.env
+
+# Don't upload node modules
+node_modules/
