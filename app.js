@@ -9,7 +9,12 @@ require('dotenv').config();
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'https://user-dashboard-iota-eight.vercel.app'],
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://user-dashboard-iota-eight.vercel.app',
+    'https://database-bg72.onrender.com' // Render backend URL
+  ],
   credentials: true,
 }));
 
