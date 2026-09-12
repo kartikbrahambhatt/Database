@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const app = express();
 
+// CORS
 app.use(cors({
   origin: [
     'http://localhost:3000',
@@ -18,6 +19,7 @@ app.use(cors({
   credentials: true,
 }));
 
+// Cross-Origin-Opener-Policy
 app.use((req, res, next) => {
   res.setHeader(
     'Cross-Origin-Opener-Policy',
@@ -26,35 +28,40 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware
 app.use(express.json());
 
+// Static uploads folder
 app.use(
   '/uploads',
   express.static(path.join(__dirname, 'uploads'))
 );
 
-// MongoDB configuration
-const MONGODB_USER = process.env.MONGODB_USER;
-const MONGODB_PASSWORD = process.env.MONGODB_PASSWORD;
+// MongoDB Connection
+const MONGODB_URI = process.env.MONGODB_URI;
 
-const MONGODB_URI =
-  `mongodb+srv://${encodeURIComponent(MONGODB_USER)}:${encodeURIComponent(MONGODB_PASSWORD)}@blog.zf0bned.mongodb.net/?appName=Blog`;
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI is not defined in environment variables');
+} else {
+  mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+      console.log('MongoDB connected');
+    })
+    .catch((err) => {
+      console.error('MongoDB connection error:', err);
+    });
+}
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log('MongoDB connected');
-  })
-  .catch((err) => {
-    console.error('MongoDB connection error:', err);
-  });
-
+// API Routes
 app.use('/api', userRoutes);
 
+// Root route
 app.get('/', (req, res) => {
   res.send('Hello from backend');
 });
 
+// Server
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
