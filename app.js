@@ -13,26 +13,41 @@ app.use(cors({
     'http://localhost:3000',
     'http://localhost:5173',
     'https://user-dashboard-iota-eight.vercel.app',
-    'https://database-bg72.onrender.com' // Render backend URL
+    'https://database-bg72.onrender.com'
   ],
   credentials: true,
 }));
 
-
 app.use((req, res, next) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.setHeader(
+    'Cross-Origin-Opener-Policy',
+    'same-origin-allow-popups'
+  );
   next();
 });
 
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-mongoose.connect('mongodb+srv://kartikbrahambhatt08:kartik123@blog.zf0bned.mongodb.net/', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected'))
-.catch((err) => console.error('MongoDB connection error:', err));
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, 'uploads'))
+);
+
+// MongoDB configuration
+const MONGODB_USER = process.env.MONGODB_USER;
+const MONGODB_PASSWORD = process.env.MONGODB_PASSWORD;
+
+const MONGODB_URI =
+  `mongodb+srv://${encodeURIComponent(MONGODB_USER)}:${encodeURIComponent(MONGODB_PASSWORD)}@blog.zf0bned.mongodb.net/?appName=Blog`;
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log('MongoDB connected');
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+  });
 
 app.use('/api', userRoutes);
 
@@ -43,5 +58,5 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
