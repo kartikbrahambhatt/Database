@@ -5,11 +5,11 @@ const cloudinary = require('../config/cloudinary');
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'insights',
+    folder: 'blogs',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
   },
 });
 
-const uploadInsight = multer({ storage });
+const upload = multer({ storage });
 
-module.exports = uploadInsight;
+module.exports = upload;
