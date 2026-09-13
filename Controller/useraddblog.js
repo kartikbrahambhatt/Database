@@ -1,4 +1,5 @@
 const AddBlog = require('../Schemas/addblog');
+const cloudinary = require('../config/cloudinary');
 
 exports.addBlog = async (req, res) => {
   try {
@@ -8,8 +9,13 @@ exports.addBlog = async (req, res) => {
 
     const { blogName, blogTitle, description } = req.body;
 
-    // Cloudinary ka complete image URL save karo
-    const image = req.file ? req.file.secure_url : null;
+    let image = null;
+
+    if (req.file) {
+      image = cloudinary.url(req.file.path, {
+        secure: true
+      });
+    }
 
     if (!blogName || !blogTitle || !description) {
       return res.status(400).json({
@@ -98,12 +104,12 @@ exports.updateBlog = async (req, res) => {
       });
     }
 
-    // Existing image ko preserve karo
     let updatedImage = existingBlog.image;
 
-    // New image upload hui hai to Cloudinary ka complete URL save karo
     if (req.file) {
-      updatedImage = req.file.secure_url;
+      updatedImage = cloudinary.url(req.file.path, {
+        secure: true
+      });
     }
 
     const updatedData = {
