@@ -1,11 +1,23 @@
 const AddInterview = require('../Schemas/interview');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('../config/cloudinary');
 
 const addInterview = async (req, res) => {
   try {
-    const { Name, CompanyName, Description, Position, CompanyURL } = req.body;
-    const Image = req.file ? req.file.filename : null;
+    const {
+      Name,
+      CompanyName,
+      Description,
+      Position,
+      CompanyURL
+    } = req.body;
+
+    let Image = null;
+
+    if (req.file) {
+      Image = cloudinary.url(req.file.path, {
+        secure: true
+      });
+    }
 
     const newInterview = new AddInterview({
       Name,
@@ -17,42 +29,66 @@ const addInterview = async (req, res) => {
     });
 
     await newInterview.save();
-    res.status(201).json({ message: 'Interview added successfully', interview: newInterview });
+
+    res.status(201).json({
+      message: 'Interview added successfully',
+      interview: newInterview
+    });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error adding interview' });
+
+    res.status(500).json({
+      message: 'Error adding interview'
+    });
   }
 };
 
+
 const getAllInterviews = async (req, res) => {
   try {
-    const interviews = await AddInterview.find().sort({ createdAt: -1 });
+    const interviews = await AddInterview
+      .find()
+      .sort({ createdAt: -1 });
+
     res.status(200).json(interviews);
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error fetching interviews' });
+
+    res.status(500).json({
+      message: 'Error fetching interviews'
+    });
   }
 };
+
 
 const editInterview = async (req, res) => {
   try {
     const { id } = req.params;
-    const { Name, CompanyName, Description, Position, CompanyURL } = req.body;
+
+    const {
+      Name,
+      CompanyName,
+      Description,
+      Position,
+      CompanyURL
+    } = req.body;
 
     const existingInterview = await AddInterview.findById(id);
+
     if (!existingInterview) {
-      return res.status(404).json({ message: 'Interview not found' });
+      return res.status(404).json({
+        message: 'Interview not found'
+      });
     }
 
     let updatedImage = existingInterview.Image;
+
     if (req.file) {
-      if (existingInterview.Image) {
-        const oldPath = path.join(__dirname, '../uploads/interviews', existingInterview.Image);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
-        }
-      }
-      updatedImage = req.file.filename;
+      updatedImage = cloudinary.url(req.file.path, {
+        secure: true
+      });
     }
 
     const updatedData = {
@@ -61,15 +97,26 @@ const editInterview = async (req, res) => {
       Description,
       Position,
       CompanyURL,
-      Image: updatedImage,
+      Image: updatedImage
     };
 
-    const updatedInterview = await AddInterview.findByIdAndUpdate(id, updatedData, { new: true });
+    const updatedInterview = await AddInterview.findByIdAndUpdate(
+      id,
+      updatedData,
+      { new: true }
+    );
 
-    res.status(200).json({ message: 'Interview updated successfully', interview: updatedInterview });
+    res.status(200).json({
+      message: 'Interview updated successfully',
+      interview: updatedInterview
+    });
+
   } catch (error) {
     console.error('Update error:', error);
-    res.status(500).json({ message: 'Error updating interview' });
+
+    res.status(500).json({
+      message: 'Error updating interview'
+    });
   }
 };
 
@@ -79,24 +126,28 @@ const deleteInterview = async (req, res) => {
     const { id } = req.params;
 
     const interview = await AddInterview.findById(id);
-    if (!interview) {
-      return res.status(404).json({ message: 'Interview not found' });
-    }
 
-    if (interview.Image) {
-      const imagePath = path.join(__dirname, '../uploads/interviews', interview.Image);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+    if (!interview) {
+      return res.status(404).json({
+        message: 'Interview not found'
+      });
     }
 
     await AddInterview.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Interview deleted successfully' });
+
+    res.status(200).json({
+      message: 'Interview deleted successfully'
+    });
+
   } catch (error) {
     console.error('Delete Error:', error);
-    res.status(500).json({ message: 'Error deleting interview' });
+
+    res.status(500).json({
+      message: 'Error deleting interview'
+    });
   }
 };
+
 
 module.exports = {
   addInterview,
